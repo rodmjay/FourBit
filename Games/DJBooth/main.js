@@ -1,9 +1,11 @@
+// Import the room module
+import { drawRoom } from "./room.js";
 // Get references to the canvas and DJ control buttons
-var canvas = document.getElementById("roomCanvas");
-var ctx = canvas.getContext("2d");
-var playButton = document.getElementById("playButton");
-var stopButton = document.getElementById("stopButton");
-var mixButton = document.getElementById("mixButton");
+const canvas = document.getElementById("roomCanvas");
+const ctx = canvas.getContext("2d");
+const playButton = document.getElementById("playButton");
+const stopButton = document.getElementById("stopButton");
+const mixButton = document.getElementById("mixButton");
 // Resize the canvas to fill its container
 function resizeCanvas() {
     canvas.width = canvas.clientWidth;
@@ -11,49 +13,65 @@ function resizeCanvas() {
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-// Game state variables
-var energyLevel = 0; // Energy level increases with music play
-var maxEnergy = 100;
-var playing = false;
-// Function to draw the room from the DJ's perspective
-function drawRoom() {
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw a gradient background simulating room depth
-    var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#444");
-    gradient.addColorStop(1, "#222");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Draw perspective lines to simulate depth (e.g., floor tiles)
-    var numLines = 10;
-    ctx.strokeStyle = "#555";
-    ctx.lineWidth = 2;
-    for (var i = 1; i < numLines; i++) {
-        var y = (canvas.height / numLines) * i;
+// Global game state
+let energyLevel = 0; // increases when music is played
+const maxEnergy = 100;
+let playing = false;
+let startTime = Date.now();
+// Create an array of block people placed along the floor
+const numPeople = 8;
+const people = [];
+for (let i = 0; i < numPeople; i++) {
+    const person = {
+        x: canvas.width * (0.2 + 0.6 * (i / (numPeople - 1))), // evenly spaced horizontally
+        baseWidth: 20,
+        baseHeight: 40,
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+    };
+    people.push(person);
+}
+function drawDancingPeople(time) {
+    const baseY = canvas.height * 0.5;
+    for (const person of people) {
+        const danceFactor = Math.abs(Math.sin((time + person.x) * 0.005));
+        const offsetY = danceFactor * 10 * (energyLevel / maxEnergy);
+        const headRadius = 8;
+        const torsoHeight = person.baseHeight;
+        const torsoWidth = person.baseWidth;
+        const armWidth = 5;
+        const armLength = torsoHeight * 0.5;
+        const legLength = 20 + danceFactor * 10;
+        const headX = person.x;
+        const headY = baseY - (torsoHeight + headRadius * 2 + offsetY);
+        const torsoX = person.x - torsoWidth / 2;
+        const torsoY = headY + headRadius * 2;
+        const armSwing = Math.sin((time + person.x) * 0.01) * 5;
+        const leftArmX = torsoX - armWidth;
+        const rightArmX = torsoX + torsoWidth;
+        const armsY = torsoY + 10;
+        const legSwing = Math.cos((time + person.x) * 0.01) * 3;
+        const leftLegX = person.x - armWidth - 2;
+        const rightLegX = person.x + 2;
+        const legY = baseY;
+        // Draw head
+        ctx.fillStyle = person.color;
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-    // Draw the crowd as a row of circles reacting to energyLevel
-    var numPeople = 10;
-    var spacing = canvas.width / (numPeople + 1);
-    for (var i = 1; i <= numPeople; i++) {
-        var baseRadius = 15;
-        var radius = baseRadius + (energyLevel / maxEnergy) * 10;
-        // Adjust color based on energy level
-        var colorIntensity = Math.min(255, Math.floor((energyLevel / maxEnergy) * 255));
-        ctx.fillStyle = "rgb(".concat(colorIntensity, ", ").concat(255 - colorIntensity, ", 0)");
-        // Position the crowd toward the top (simulate a room view)
-        var x = i * spacing;
-        var y = canvas.height * 0.3; // 30% from the top
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.arc(headX, headY + headRadius, headRadius, 0, Math.PI * 2);
         ctx.fill();
+        // Draw torso
+        ctx.fillStyle = person.color;
+        ctx.fillRect(torsoX, torsoY, torsoWidth, torsoHeight);
+        // Draw left arm
+        ctx.fillRect(leftArmX, armsY + armSwing, armWidth, armLength);
+        // Draw right arm
+        ctx.fillRect(rightArmX, armsY - armSwing, armWidth, armLength);
+        // Draw left leg
+        ctx.fillRect(leftLegX, legY, armWidth, legLength);
+        // Draw right leg
+        ctx.fillRect(rightLegX, legY, armWidth, legLength);
     }
 }
-// Update game state (e.g., decay energy level when not playing)
+// Update game state (e.g., energy level decay)
 function updateGameState() {
     if (!playing && energyLevel > 0) {
         energyLevel = Math.max(0, energyLevel - 0.1);
@@ -61,27 +79,31 @@ function updateGameState() {
 }
 // Main game loop
 function gameLoop() {
+    const currentTime = Date.now() - startTime;
     updateGameState();
-    drawRoom();
+    // Use the room module to draw the room
+    drawRoom(ctx, canvas);
+    // Draw dancing people on top of the room
+    drawDancingPeople(currentTime);
     requestAnimationFrame(gameLoop);
 }
 gameLoop();
-// Event listeners for DJ controls
-playButton.addEventListener("click", function () {
+// DJ control event listeners
+playButton.addEventListener("click", () => {
     playing = true;
     energyLevel = Math.min(maxEnergy, energyLevel + 15);
-    // (Optionally, integrate real audio playback here.)
 });
-stopButton.addEventListener("click", function () {
+stopButton.addEventListener("click", () => {
     playing = false;
 });
-mixButton.addEventListener("click", function () {
+mixButton.addEventListener("click", () => {
     energyLevel = Math.min(maxEnergy, energyLevel + 10);
 });
 // Also add a key listener for additional interaction (e.g., space bar)
-document.addEventListener("keydown", function (event) {
+document.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
         playing = true;
         energyLevel = Math.min(maxEnergy, energyLevel + 15);
     }
 });
+//# sourceMappingURL=main.js.map
