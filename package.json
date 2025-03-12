@@ -7,9 +7,14 @@
     "build:game1": "cd Games/Game1 && tsc",
     "build:game2": "cd Games/Game2 && tsc",
     "build:game3": "cd Games/Game3 && tsc",
-    "build": "npm run build:sdk && npm run build:game1 && npm run build:game2 && npm run build:game3"
+    "build:djbooth": "cd Games/DJBooth && tsc",
+    "build": "npm run build:sdk && npm run build:game1 && npm run build:game2 && npm run build:game3 && npm run build:djbooth",
+    "serve:djbooth": "live-server --port=8080 --open=Games/DJBooth/index.html",
+    "start:djbooth": "concurrently \"cd Games/DJBooth && tsc -w\" \"npm run serve:djbooth\""
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "live-server": "^1.2.1",
+    "concurrently": "^7.0.0"
   }
 }
