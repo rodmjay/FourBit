@@ -1,13 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Game 1 - Hello World</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Hello World from Game 1!</h1>
-    <div id="message"></div>
-    <script type="module" src="main.js"></script>
-</body>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>VR Synth & Drum Sequencer Configurator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- Include A-Frame and Tone.js via CDN -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.33/Tone.min.js"></script>
+    <!-- Include external JavaScript file before the scene to fix component registration -->
+    <script src="main.js"></script>
+    <!-- Link external CSS file -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <!-- Configuration Overlay -->
+    <div id="config-overlay">
+      <h3>Configure Module</h3>
+      <!-- Common Effect Settings -->
+      <label>
+        <input type="checkbox" id="config-reverb-checkbox"> Enable Reverb
+      </label>
+      <label>
+        Reverb Dry/Wet:
+        <input type="range" id="config-reverb-wet" min="0" max="1" step="0.01">
+      </label>
+      <label>
+        Reverb Preset:
+        <select id="config-reverb-preset">
+          <option value="smallHall">Small Hall</option>
+          <option value="largeHall">Large Hall</option>
+          <option value="plate">Plate</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" id="config-distortion-checkbox"> Enable Distortion
+      </label>
+      <label>
+        Distortion Dry/Wet:
+        <input type="range" id="config-distortion-wet" min="0" max="1" step="0.01">
+      </label>
+      <label>
+        Distortion Preset:
+        <select id="config-distortion-preset">
+          <option value="light">Light</option>
+          <option value="medium">Medium</option>
+          <option value="heavy">Heavy</option>
+        </select>
+      </label>
+      
+      <!-- Drum Sequencer Config Section -->
+      <div id="drum-config" style="display: none; border-top: 1px solid #FFF; margin-top: 10px; padding-top: 10px;">
+        <h4>Drum Sequencer Config</h4>
+        <!-- Play/Stop Buttons -->
+        <div>
+          <button id="drum-play-button">Play Sequence</button>
+          <button id="drum-stop-button">Stop Sequence</button>
+        </div>
+        <!-- Drum Pattern Grids -->
+        <div style="overflow-x: auto; margin-top: 10px;">
+          <div class="drum-label"><strong>Kick Pattern:</strong></div>
+          <div id="drum-kick-pattern" class="drum-row">
+            <!-- 16 checkboxes for kick -->
+            <input type="checkbox" id="drum-kick-step-0">
+            <input type="checkbox" id="drum-kick-step-1">
+            <input type="checkbox" id="drum-kick-step-2">
+            <input type="checkbox" id="drum-kick-step-3">
+            <input type="checkbox" id="drum-kick-step-4">
+            <input type="checkbox" id="drum-kick-step-5">
+            <input type="checkbox" id="drum-kick-step-6">
+            <input type="checkbox" id="drum-kick-step-7">
+            <input type="checkbox" id="drum-kick-step-8">
+            <input type="checkbox" id="drum-kick-step-9">
+            <input type="checkbox" id="drum-kick-step-10">
+            <input type="checkbox" id="drum-kick-step-11">
+            <input type="checkbox" id="drum-kick-step-12">
+            <input type="checkbox" id="drum-kick-step-13">
+            <input type="checkbox" id="drum-kick-step-14">
+            <input type="checkbox" id="drum-kick-step-15">
+          </div>
+          <div class="drum-label"><strong>Snare Pattern:</strong></div>
+          <div id="drum-snare-pattern" class="drum-row">
+            <!-- 16 checkboxes for snare -->
+            <input type="checkbox" id="drum-snare-step-0">
+            <input type="checkbox" id="drum-snare-step-1">
+            <input type="checkbox" id="drum-snare-step-2">
+            <input type="checkbox" id="drum-snare-step-3">
+            <input type="checkbox" id="drum-snare-step-4">
+            <input type="checkbox" id="drum-snare-step-5">
+            <input type="checkbox" id="drum-snare-step-6">
+            <input type="checkbox" id="drum-snare-step-7">
+            <input type="checkbox" id="drum-snare-step-8">
+            <input type="checkbox" id="drum-snare-step-9">
+            <input type="checkbox" id="drum-snare-step-10">
+            <input type="checkbox" id="drum-snare-step-11">
+            <input type="checkbox" id="drum-snare-step-12">
+            <input type="checkbox" id="drum-snare-step-13">
+            <input type="checkbox" id="drum-snare-step-14">
+            <input type="checkbox" id="drum-snare-step-15">
+          </div>
+          <div class="drum-label"><strong>HiHat Pattern:</strong></div>
+          <div id="drum-hihat-pattern" class="drum-row">
+            <!-- 16 checkboxes for hihat -->
+            <input type="checkbox" id="drum-hihat-step-0">
+            <input type="checkbox" id="drum-hihat-step-1">
+            <input type="checkbox" id="drum-hihat-step-2">
+            <input type="checkbox" id="drum-hihat-step-3">
+            <input type="checkbox" id="drum-hihat-step-4">
+            <input type="checkbox" id="drum-hihat-step-5">
+            <input type="checkbox" id="drum-hihat-step-6">
+            <input type="checkbox" id="drum-hihat-step-7">
+            <input type="checkbox" id="drum-hihat-step-8">
+            <input type="checkbox" id="drum-hihat-step-9">
+            <input type="checkbox" id="drum-hihat-step-10">
+            <input type="checkbox" id="drum-hihat-step-11">
+            <input type="checkbox" id="drum-hihat-step-12">
+            <input type="checkbox" id="drum-hihat-step-13">
+            <input type="checkbox" id="drum-hihat-step-14">
+            <input type="checkbox" id="drum-hihat-step-15">
+          </div>
+        </div>
+        <!-- Drum Sample Selection -->
+        <div>
+          <label>
+            Kick Sample:
+            <select id="drum-kick-sample">
+              <option value="kick1">Kick 1</option>
+              <option value="kick2">Kick 2</option>
+              <option value="kick3">Kick 3</option>
+              <option value="kick4">Kick 4</option>
+              <option value="kick5">Kick 5</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Snare Sample:
+            <select id="drum-snare-sample">
+              <option value="snare1">Snare 1</option>
+              <option value="snare2">Snare 2</option>
+              <option value="snare3">Snare 3</option>
+              <option value="snare4">Snare 4</option>
+              <option value="snare5">Snare 5</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            HiHat Sample:
+            <select id="drum-hihat-sample">
+              <option value="hihat1">HiHat 1</option>
+              <option value="hihat2">HiHat 2</option>
+              <option value="hihat3">HiHat 3</option>
+              <option value="hihat4">HiHat 4</option>
+              <option value="hihat5">HiHat 5</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button onclick="saveConfig()">Save</button>
+      <button onclick="closeConfig()">Cancel</button>
+    </div>
+
+    <!-- A-Frame Scene -->
+    <a-scene>
+      <!-- Camera with controls and cursor -->
+      <a-entity camera wasd-controls look-controls position="0 1.6 0">
+        <a-cursor raycaster="objects: .clickable" fuse="true" fuse-timeout="500" color="#FF0000"></a-cursor>
+      </a-entity>
+      
+      <!-- Floor and Lighting -->
+      <a-plane rotation="-90 0 0" width="20" height="20" color="#7BC8A4"></a-plane>
+      <a-entity light="type: ambient; color: #BBB"></a-entity>
+      <a-entity light="type: directional; intensity: 0.5" position="1 1 0"></a-entity>
+      
+      <!-- Synth Modules -->
+      <a-box class="clickable" id="synth1" position="-4 1 -5" rotation="0 45 0" color="#4CC3D9"
+             synth-interaction="note: C4; synthType: synth; effects: reverb,distortion; reverbWet: 0.5; distortionWet: 0.5; reverbPreset: smallHall; distortionPreset: light">
+        <a-entity position="0 0.7 0" text="value: Click Me; align: center; color: #FFF; width: 2"></a-entity>
+      </a-box>
+      <a-sphere class="clickable" id="synth2" position="-2 1 -5" radius="0.5" color="#EF2D5E"
+                synth-interaction="note: D3; synthType: membrane; effects: distortion; reverbWet: 0.5; distortionWet: 0.5; reverbPreset: smallHall; distortionPreset: medium">
+        <a-entity position="0 0.7 0" text="value: Click Me; align: center; color: #FFF; width: 2"></a-entity>
+      </a-sphere>
+      <a-cylinder class="clickable" id="synth3" position="0 1 -5" radius="0.5" height="1" color="#FFC65D"
+                  synth-interaction="note: G4; synthType: fm; effects: reverb; reverbWet: 0.5; distortionWet: 0.5; reverbPreset: largeHall; distortionPreset: light">
+        <a-entity position="0 0.7 0" text="value: Click Me; align: center; color: #FFF; width: 2"></a-entity>
+      </a-cylinder>
+      
+      <!-- Drum Sequencer Module -->
+      <a-box class="clickable" id="drumModule" position="4 1 -5" rotation="0 45 0" color="#FFAA00"
+             drum-sequencer="effects: reverb,distortion; reverbWet: 0.5; distortionWet: 0.5; reverbPreset: plate; distortionPreset: heavy; kickSample: kick1; snareSample: snare1; hihatSample: hihat1">
+        <a-entity position="0 0.7 0" text="value: Drum Sequencer; align: center; color: #FFF; width: 2"></a-entity>
+      </a-box>
+    </a-scene>
+  </body>
 </html>
