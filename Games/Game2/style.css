@@ -1,0 +1,18 @@
+/* Games/Game2/style.css */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #e0f0e0;
+}
+
+h1 {
+    color: #336633;
+}
+
+#message {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #d0e0d0;
+    border-radius: 5px;
+    display: inline-block;
+}
