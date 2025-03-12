@@ -128,15 +128,64 @@ function drawRoom() {
 
 // Function to draw dancing block people on the floor
 function drawDancingPeople(time: number) {
+  // Define a base line for the dancers (e.g., floor level in the room)
+  const baseY = canvas.height * 0.75; 
+
   for (const person of people) {
-    // Use a sine wave to simulate dancing (jumping up and down)
+    // Use a sine wave to simulate dancing motion
     const danceFactor = Math.abs(Math.sin((time + person.x) * 0.005));
-    const height = person.baseHeight + danceFactor * 20 * (energyLevel / maxEnergy);
-    const width = person.baseWidth;
-    // Position the person on the floor (just above the floor top)
-    const y = canvas.height * 0.5 - height;
+    const offsetY = danceFactor * 10 * (energyLevel / maxEnergy);
+
+    // Define dimensions for each body part
+    const headRadius = 8;
+    const torsoHeight = person.baseHeight * 0.6; // previously defined baseHeight
+    const torsoWidth = person.baseWidth;   // previously defined baseWidth
+    const armWidth = 5;
+    const armLength = torsoHeight * 0.5;
+    const legLength = 20 + danceFactor * 10; // legs adjust with dance factor
+
+    // Calculate positions
+    // Head: Positioned above the torso with a slight offset from dancing motion
+    const headX = person.x;
+    const headY = baseY - (torsoHeight + headRadius * 2 + offsetY);
+
+    // Torso: Drawn as a rectangle directly under the head
+    const torsoX = person.x - torsoWidth / 2;
+    const torsoY = headY + headRadius * 2;
+
+    // Arms: Swing left and right using a sine function for a natural motion
+    const armSwing = Math.sin((time + person.x) * 0.01) * 5;
+    const leftArmX = torsoX - armWidth;
+    const rightArmX = torsoX + torsoWidth;
+    const armsY = torsoY + 10; // arms start a little below the top of the torso
+
+    // Legs: Slight swing as well
+    const legSwing = Math.cos((time + person.x) * 0.01) * 3;
+    const leftLegX = person.x - armWidth - 2;
+    const rightLegX = person.x + 2;
+    const legY = baseY - legLength; // legs start at the base line
+
+    // Draw head (circle)
     ctx.fillStyle = person.color;
-    ctx.fillRect(person.x - width / 2, y, width, height);
+    ctx.beginPath();
+    ctx.arc(headX, headY + headRadius, headRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw torso (rectangle)
+    ctx.fillStyle = person.color;
+    ctx.fillRect(torsoX, torsoY, torsoWidth, torsoHeight);
+
+    // Draw left arm
+    ctx.fillRect(leftArmX, armsY + armSwing, armWidth, armLength);
+
+    // Draw right arm
+    ctx.fillRect(rightArmX, armsY - armSwing, armWidth, armLength);
+
+    // Draw left leg
+    ctx.fillRect(leftLegX, legY + legSwing, armWidth, legLength);
+
+    // Draw right leg
+    ctx.fillRect(rightLegX, legY - legSwing, armWidth, legLength);
   }
 }
 

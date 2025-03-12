@@ -106,16 +106,53 @@ function drawRoom() {
 }
 // Function to draw dancing block people on the floor
 function drawDancingPeople(time) {
+    // Define a base line for the dancers (e.g., floor level in the room)
+    var baseY = canvas.height * 0.75;
     for (var _i = 0, people_1 = people; _i < people_1.length; _i++) {
         var person = people_1[_i];
-        // Use a sine wave to simulate dancing (jumping up and down)
+        // Use a sine wave to simulate dancing motion
         var danceFactor = Math.abs(Math.sin((time + person.x) * 0.005));
-        var height = person.baseHeight + danceFactor * 20 * (energyLevel / maxEnergy);
-        var width = person.baseWidth;
-        // Position the person on the floor (just above the floor top)
-        var y = canvas.height * 0.5 - height;
+        var offsetY = danceFactor * 10 * (energyLevel / maxEnergy);
+        // Define dimensions for each body part
+        var headRadius = 8;
+        var torsoHeight = person.baseHeight * 0.6; // previously defined baseHeight
+        var torsoWidth = person.baseWidth; // previously defined baseWidth
+        var armWidth = 5;
+        var armLength = torsoHeight * 0.5;
+        var legLength = 20 + danceFactor * 10; // legs adjust with dance factor
+        // Calculate positions
+        // Head: Positioned above the torso with a slight offset from dancing motion
+        var headX = person.x;
+        var headY = baseY - (torsoHeight + headRadius * 2 + offsetY);
+        // Torso: Drawn as a rectangle directly under the head
+        var torsoX = person.x - torsoWidth / 2;
+        var torsoY = headY + headRadius * 2;
+        // Arms: Swing left and right using a sine function for a natural motion
+        var armSwing = Math.sin((time + person.x) * 0.01) * 5;
+        var leftArmX = torsoX - armWidth;
+        var rightArmX = torsoX + torsoWidth;
+        var armsY = torsoY + 10; // arms start a little below the top of the torso
+        // Legs: Slight swing as well
+        var legSwing = Math.cos((time + person.x) * 0.01) * 3;
+        var leftLegX = person.x - armWidth - 2;
+        var rightLegX = person.x + 2;
+        var legY = baseY - legLength; // legs start at the base line
+        // Draw head (circle)
         ctx.fillStyle = person.color;
-        ctx.fillRect(person.x - width / 2, y, width, height);
+        ctx.beginPath();
+        ctx.arc(headX, headY + headRadius, headRadius, 0, Math.PI * 2);
+        ctx.fill();
+        // Draw torso (rectangle)
+        ctx.fillStyle = person.color;
+        ctx.fillRect(torsoX, torsoY, torsoWidth, torsoHeight);
+        // Draw left arm
+        ctx.fillRect(leftArmX, armsY + armSwing, armWidth, armLength);
+        // Draw right arm
+        ctx.fillRect(rightArmX, armsY - armSwing, armWidth, armLength);
+        // Draw left leg
+        ctx.fillRect(leftLegX, legY + legSwing, armWidth, legLength);
+        // Draw right leg
+        ctx.fillRect(rightLegX, legY - legSwing, armWidth, legLength);
     }
 }
 // Function to draw the DJ booth with perspective
