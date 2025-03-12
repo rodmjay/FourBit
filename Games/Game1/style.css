@@ -1,18 +1,46 @@
-/* Games/Game1/style.css */
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f0f0f0;
+  margin: 0;
+  overflow: hidden;
 }
 
-h1 {
-    color: #333;
+/* Configuration Overlay Styles */
+#config-overlay {
+  position: fixed;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  padding: 20px;
+  z-index: 1000;
+  display: none;
+  font-family: sans-serif;
+  max-width: 700px;
+}
+#config-overlay label {
+  display: block;
+  margin: 8px 0;
+}
+#config-overlay input[type="range"] {
+  width: 100%;
+}
+#config-overlay button {
+  margin: 10px 5px 0 0;
 }
 
-#message {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    display: inline-block;
+/* Drum Grid Styles */
+.drum-row {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+.drum-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+}
+.drum-label {
+  font-size: 0.9em;
+  margin-bottom: 4px;
 }
