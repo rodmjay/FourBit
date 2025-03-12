@@ -1,5 +1,6 @@
 // Games/Game1/main.ts
-import { logHello, getGreeting, createElement } from "../../SDK/src/shared";
+// Using relative import for the SDK
+import { logHello, getGreeting } from "../../SDK/src/shared";
 
 // Log hello message to console
 logHello();

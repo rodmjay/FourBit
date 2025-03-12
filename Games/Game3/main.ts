@@ -1,5 +1,6 @@
 // Games/Game3/main.ts
-import { logHello } from "../../SDK/src/shared";
+// Using relative import for the SDK
+import { logHello, getGreeting } from "../../SDK/src/shared";
 
 // Log hello message to console
 logHello();
@@ -9,6 +10,6 @@ console.log("Hello from Game 3 main.ts!");
 document.addEventListener("DOMContentLoaded", () => {
     const messageElement = document.getElementById("message");
     if (messageElement) {
-        messageElement.textContent = "Welcome to Game 3!";
+        messageElement.textContent = getGreeting("Game 3");
     }
 });
