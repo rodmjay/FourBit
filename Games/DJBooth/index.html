@@ -4,17 +4,24 @@
     <meta charset="UTF-8" />
     <title>DJBooth Prototype</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Link to external CSS -->
+    <!-- Link external CSS -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- Main game canvas -->
-    <canvas id="gameCanvas"></canvas>
+    <!-- Game Container: Top for room view, bottom for DJ controls -->
+    <div id="game-container">
+      <!-- Room view (DJ's perspective) -->
+      <canvas id="roomCanvas"></canvas>
+      <!-- DJ Control Panel -->
+      <div id="djControls">
+        <button id="playButton">Play Music</button>
+        <button id="stopButton">Stop Music</button>
+        <button id="mixButton">Mix</button>
+        <!-- Additional controls can be added here -->
+      </div>
+    </div>
     
-    <!-- Optional UI control for playing music -->
-    <button id="playButton">Play Music</button>
-    
-    <!-- Include the compiled JavaScript (from main.ts) -->
+    <!-- Include the compiled JavaScript from main.ts -->
     <script src="main.js"></script>
   </body>
 </html>

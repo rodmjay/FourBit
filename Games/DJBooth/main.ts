@@ -1,93 +1,100 @@
-// Get references to the canvas and button
-const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d")!; // Non-null assertion since we know the canvas exists
+// Get references to the canvas and DJ control buttons
+const canvas = document.getElementById("roomCanvas") as HTMLCanvasElement;
+const ctx = canvas.getContext("2d")!;
 const playButton = document.getElementById("playButton") as HTMLButtonElement;
+const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
+const mixButton = document.getElementById("mixButton") as HTMLButtonElement;
 
-// Ensure the canvas resizes to fit the window
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// Resize the canvas to fill its container
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 // Game state variables
-let energyLevel = 0; // Represents the DJ's music energy
+let energyLevel = 0; // Energy level increases with music play
 const maxEnergy = 100;
+let playing = false;
 
-// Function to draw the DJ booth
-function drawDJBooth() {
-  // For simplicity, draw a rectangle at the bottom center
-  const boothWidth = 200;
-  const boothHeight = 100;
-  const x = (canvas.width - boothWidth) / 2;
-  const y = canvas.height - boothHeight - 20;
-  
-  ctx.fillStyle = "#555";
-  ctx.fillRect(x, y, boothWidth, boothHeight);
-  
-  // Add some text to indicate the booth
-  ctx.fillStyle = "#fff";
-  ctx.font = "20px sans-serif";
-  ctx.fillText("DJ Booth", x + 50, y + 55);
-}
+// Function to draw the room from the DJ's perspective
+function drawRoom() {
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Function to draw the crowd
-function drawCrowd() {
-  // For simplicity, draw a row of circles that react to energyLevel
+  // Draw a gradient background simulating room depth
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "#444");
+  gradient.addColorStop(1, "#222");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw perspective lines to simulate depth (e.g., floor tiles)
+  const numLines = 10;
+  ctx.strokeStyle = "#555";
+  ctx.lineWidth = 2;
+  for (let i = 1; i < numLines; i++) {
+    const y = (canvas.height / numLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  // Draw the crowd as a row of circles reacting to energyLevel
   const numPeople = 10;
   const spacing = canvas.width / (numPeople + 1);
-  
   for (let i = 1; i <= numPeople; i++) {
-    // The size and brightness of each "person" depends on the energy level
     const baseRadius = 15;
-    const radius = baseRadius + (energyLevel / maxEnergy) * 10; // Increase size with energy
-    // Color intensity changes with energy
+    const radius = baseRadius + (energyLevel / maxEnergy) * 10;
+    // Adjust color based on energy level
     const colorIntensity = Math.min(255, Math.floor((energyLevel / maxEnergy) * 255));
     ctx.fillStyle = `rgb(${colorIntensity}, ${255 - colorIntensity}, 0)`;
-    
+
+    // Position the crowd toward the top (simulate a room view)
     const x = i * spacing;
-    const y = canvas.height - 150;
+    const y = canvas.height * 0.3; // 30% from the top
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-// Main game loop
-function gameLoop() {
-  // Clear the canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw background elements (could add a simple gradient or static background)
-  ctx.fillStyle = "#222";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw the crowd and DJ booth
-  drawCrowd();
-  drawDJBooth();
-  
-  // Optionally, slowly decrease energy over time
-  energyLevel = Math.max(0, energyLevel - 0.1);
-  
-  requestAnimationFrame(gameLoop);
+// Update game state (e.g., decay energy level when not playing)
+function updateGameState() {
+  if (!playing && energyLevel > 0) {
+    energyLevel = Math.max(0, energyLevel - 0.1);
+  }
 }
 
-// Event listener for playing music (simulate by increasing energy level)
+// Main game loop
+function gameLoop() {
+  updateGameState();
+  drawRoom();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+// Event listeners for DJ controls
 playButton.addEventListener("click", () => {
-  // Increase energy level when the button is clicked
+  playing = true;
+  energyLevel = Math.min(maxEnergy, energyLevel + 15);
+  // (Optionally, integrate real audio playback here.)
+});
+
+stopButton.addEventListener("click", () => {
+  playing = false;
+});
+
+mixButton.addEventListener("click", () => {
   energyLevel = Math.min(maxEnergy, energyLevel + 10);
-  // Optionally, trigger audio playback here using Tone.js or HTML5 Audio
 });
 
 // Also add a key listener for additional interaction (e.g., space bar)
 document.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
-    energyLevel = Math.min(maxEnergy, energyLevel + 10);
+    playing = true;
+    energyLevel = Math.min(maxEnergy, energyLevel + 15);
   }
 });
-
-// Handle window resize
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-
-// Start the game loop
-gameLoop();
