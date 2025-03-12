@@ -5,10 +5,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "outDir": "./",
-    "strict": true
+    "strict": true,
+    "sourceMap": true
   },
-  "include": ["*.ts"],
-  "references": [
-    { "path": "../../SDK" }
-  ]
+  "files": ["main.ts"]
 }
