@@ -1,0 +1,15 @@
+{
+  "name": "fourbit",
+  "version": "1.0.0",
+  "description": "FourBit Games with Shared SDK",
+  "scripts": {
+    "build:sdk": "cd SDK && tsc",
+    "build:game1": "cd Games/Game1 && tsc",
+    "build:game2": "cd Games/Game2 && tsc",
+    "build:game3": "cd Games/Game3 && tsc",
+    "build": "npm run build:sdk && npm run build:game1 && npm run build:game2 && npm run build:game3"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

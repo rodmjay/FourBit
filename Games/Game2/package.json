@@ -1,0 +1,11 @@
+{
+  "name": "game2",
+  "version": "1.0.0",
+  "description": "Game 2 for FourBit",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
