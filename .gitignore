@@ -321,6 +321,9 @@ venv/
 *.py[cod]
 *$py.class
 
+# JavaScript source maps
+*.js.map
+
 # Cake - Uncomment if you are using it
 # tools/**
 # !tools/packages.config
