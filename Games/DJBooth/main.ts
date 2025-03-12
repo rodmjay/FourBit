@@ -42,15 +42,40 @@ for (let i = 0; i < numPeople; i++) {
 
 // Function to draw the room with perspective
 function drawRoom() {
-  // Clear the canvas
+  // Clear the entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Define the floor as a trapezoid
-  const floorTopY = canvas.height * 0.5;
+  // Define key dimensions based on canvas size for perspective
+  const ceilingHeight = canvas.height * 0.25;
+  const floorY = canvas.height * 0.75; // where the floor starts (from DJ's view)
+  const backWallHeight = canvas.height * 0.15;
+  const backWallY = ceilingHeight; // back wall sits right below the ceiling
+  const doorWidth = canvas.width * 0.15;
+  const doorHeight = canvas.height * 0.4;
+  const doorX = (canvas.width - doorWidth) / 2;
+  const doorY = backWallY + (backWallHeight - doorHeight) / 2;
+
+  // Draw the ceiling (top area)
+  ctx.fillStyle = "#666";
+  ctx.fillRect(0, 0, canvas.width, ceilingHeight);
+
+  // Draw the back wall (center area between ceiling and floor)
+  ctx.fillStyle = "#777";
+  ctx.fillRect(canvas.width * 0.1, backWallY, canvas.width * 0.8, backWallHeight);
+
+  // Draw the door on the back wall
+  ctx.fillStyle = "#333";
+  ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
+  // Optional: draw a door frame
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(doorX, doorY, doorWidth, doorHeight);
+
+  // Draw the floor as a trapezoid (from the bottom of the back wall to the bottom of the canvas)
   ctx.fillStyle = "#444";
   ctx.beginPath();
-  ctx.moveTo(canvas.width * 0.1, floorTopY);
-  ctx.lineTo(canvas.width * 0.9, floorTopY);
+  ctx.moveTo(canvas.width * 0.1, floorY);
+  ctx.lineTo(canvas.width * 0.9, floorY);
   ctx.lineTo(canvas.width, canvas.height);
   ctx.lineTo(0, canvas.height);
   ctx.closePath();
@@ -60,7 +85,7 @@ function drawRoom() {
   ctx.fillStyle = "#555";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(canvas.width * 0.1, floorTopY);
+  ctx.lineTo(canvas.width * 0.1, floorY);
   ctx.lineTo(canvas.width * 0.1, canvas.height);
   ctx.lineTo(0, canvas.height);
   ctx.closePath();
@@ -70,22 +95,30 @@ function drawRoom() {
   ctx.fillStyle = "#555";
   ctx.beginPath();
   ctx.moveTo(canvas.width, 0);
-  ctx.lineTo(canvas.width * 0.9, floorTopY);
+  ctx.lineTo(canvas.width * 0.9, floorY);
   ctx.lineTo(canvas.width * 0.9, canvas.height);
   ctx.lineTo(canvas.width, canvas.height);
   ctx.closePath();
   ctx.fill();
 
-  // Draw the ceiling as a light rectangle on the top portion
-  ctx.fillStyle = "#666";
-  ctx.fillRect(0, 0, canvas.width, floorTopY * 0.8);
+  // Draw overhead lights on the ceiling
+  const lightRadius = 8;
+  const numLights = 5;
+  ctx.fillStyle = "#ff0"; // yellow for a warm light effect
+  for (let i = 0; i < numLights; i++) {
+    const lightX = canvas.width * 0.15 + i * (canvas.width * 0.15);
+    const lightY = ceilingHeight * 0.5;
+    ctx.beginPath();
+    ctx.arc(lightX, lightY, lightRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
   
-  // Optionally, add perspective lines on the floor to enhance depth
+  // Add perspective lines on the floor to enhance depth
   const numLines = 10;
   ctx.strokeStyle = "#777";
   ctx.lineWidth = 1;
   for (let i = 1; i < numLines; i++) {
-    const y = floorTopY + ((canvas.height - floorTopY) / numLines) * i;
+    const y = floorY + ((canvas.height - floorY) / numLines) * i;
     ctx.beginPath();
     ctx.moveTo(canvas.width * 0.1, y);
     ctx.lineTo(canvas.width * 0.9, y);
@@ -95,15 +128,64 @@ function drawRoom() {
 
 // Function to draw dancing block people on the floor
 function drawDancingPeople(time: number) {
+  // Define a base line for the dancers (e.g., floor level in the room)
+  const baseY = canvas.height * 0.75; 
+
   for (const person of people) {
-    // Use a sine wave to simulate dancing (jumping up and down)
+    // Use a sine wave to simulate dancing motion
     const danceFactor = Math.abs(Math.sin((time + person.x) * 0.005));
-    const height = person.baseHeight + danceFactor * 20 * (energyLevel / maxEnergy);
-    const width = person.baseWidth;
-    // Position the person on the floor (just above the floor top)
-    const y = canvas.height * 0.5 - height;
+    const offsetY = danceFactor * 10 * (energyLevel / maxEnergy);
+
+    // Define dimensions for each body part
+    const headRadius = 8;
+    const torsoHeight = person.baseHeight * 0.6; // previously defined baseHeight
+    const torsoWidth = person.baseWidth;   // previously defined baseWidth
+    const armWidth = 5;
+    const armLength = torsoHeight * 0.5;
+    const legLength = 20 + danceFactor * 10; // legs adjust with dance factor
+
+    // Calculate positions
+    // Head: Positioned above the torso with a slight offset from dancing motion
+    const headX = person.x;
+    const headY = baseY - (torsoHeight + headRadius * 2 + offsetY);
+
+    // Torso: Drawn as a rectangle directly under the head
+    const torsoX = person.x - torsoWidth / 2;
+    const torsoY = headY + headRadius * 2;
+
+    // Arms: Swing left and right using a sine function for a natural motion
+    const armSwing = Math.sin((time + person.x) * 0.01) * 5;
+    const leftArmX = torsoX - armWidth;
+    const rightArmX = torsoX + torsoWidth;
+    const armsY = torsoY + 10; // arms start a little below the top of the torso
+
+    // Legs: Slight swing as well
+    const legSwing = Math.cos((time + person.x) * 0.01) * 3;
+    const leftLegX = person.x - armWidth - 2;
+    const rightLegX = person.x + 2;
+    const legY = baseY - legLength; // legs start at the base line
+
+    // Draw head (circle)
     ctx.fillStyle = person.color;
-    ctx.fillRect(person.x - width / 2, y, width, height);
+    ctx.beginPath();
+    ctx.arc(headX, headY + headRadius, headRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw torso (rectangle)
+    ctx.fillStyle = person.color;
+    ctx.fillRect(torsoX, torsoY, torsoWidth, torsoHeight);
+
+    // Draw left arm
+    ctx.fillRect(leftArmX, armsY + armSwing, armWidth, armLength);
+
+    // Draw right arm
+    ctx.fillRect(rightArmX, armsY - armSwing, armWidth, armLength);
+
+    // Draw left leg
+    ctx.fillRect(leftLegX, legY + legSwing, armWidth, legLength);
+
+    // Draw right leg
+    ctx.fillRect(rightLegX, legY - legSwing, armWidth, legLength);
   }
 }
 
