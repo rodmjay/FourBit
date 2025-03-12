@@ -1,0 +1,13 @@
+{
+  "name": "fourbit-sdk",
+  "version": "1.0.0",
+  "description": "Shared SDK for FourBit games",
+  "main": "dist/shared.js",
+  "types": "dist/shared.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
