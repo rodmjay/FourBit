@@ -1,5 +1,5 @@
 // Games/Game2/main.js
-import { logHello, getGreeting } from "../../SDK/dist/src/shared.js";
+import { logHello, getGreeting } from "./sdk/shared.js";
 
 // Log hello message to console
 logHello();
