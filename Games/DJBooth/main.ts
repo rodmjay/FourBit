@@ -42,15 +42,40 @@ for (let i = 0; i < numPeople; i++) {
 
 // Function to draw the room with perspective
 function drawRoom() {
-  // Clear the canvas
+  // Clear the entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Define the floor as a trapezoid
-  const floorTopY = canvas.height * 0.5;
+  // Define key dimensions based on canvas size for perspective
+  const ceilingHeight = canvas.height * 0.25;
+  const floorY = canvas.height * 0.75; // where the floor starts (from DJ's view)
+  const backWallHeight = canvas.height * 0.15;
+  const backWallY = ceilingHeight; // back wall sits right below the ceiling
+  const doorWidth = canvas.width * 0.15;
+  const doorHeight = canvas.height * 0.4;
+  const doorX = (canvas.width - doorWidth) / 2;
+  const doorY = backWallY + (backWallHeight - doorHeight) / 2;
+
+  // Draw the ceiling (top area)
+  ctx.fillStyle = "#666";
+  ctx.fillRect(0, 0, canvas.width, ceilingHeight);
+
+  // Draw the back wall (center area between ceiling and floor)
+  ctx.fillStyle = "#777";
+  ctx.fillRect(canvas.width * 0.1, backWallY, canvas.width * 0.8, backWallHeight);
+
+  // Draw the door on the back wall
+  ctx.fillStyle = "#333";
+  ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
+  // Optional: draw a door frame
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(doorX, doorY, doorWidth, doorHeight);
+
+  // Draw the floor as a trapezoid (from the bottom of the back wall to the bottom of the canvas)
   ctx.fillStyle = "#444";
   ctx.beginPath();
-  ctx.moveTo(canvas.width * 0.1, floorTopY);
-  ctx.lineTo(canvas.width * 0.9, floorTopY);
+  ctx.moveTo(canvas.width * 0.1, floorY);
+  ctx.lineTo(canvas.width * 0.9, floorY);
   ctx.lineTo(canvas.width, canvas.height);
   ctx.lineTo(0, canvas.height);
   ctx.closePath();
@@ -60,7 +85,7 @@ function drawRoom() {
   ctx.fillStyle = "#555";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(canvas.width * 0.1, floorTopY);
+  ctx.lineTo(canvas.width * 0.1, floorY);
   ctx.lineTo(canvas.width * 0.1, canvas.height);
   ctx.lineTo(0, canvas.height);
   ctx.closePath();
@@ -70,22 +95,30 @@ function drawRoom() {
   ctx.fillStyle = "#555";
   ctx.beginPath();
   ctx.moveTo(canvas.width, 0);
-  ctx.lineTo(canvas.width * 0.9, floorTopY);
+  ctx.lineTo(canvas.width * 0.9, floorY);
   ctx.lineTo(canvas.width * 0.9, canvas.height);
   ctx.lineTo(canvas.width, canvas.height);
   ctx.closePath();
   ctx.fill();
 
-  // Draw the ceiling as a light rectangle on the top portion
-  ctx.fillStyle = "#666";
-  ctx.fillRect(0, 0, canvas.width, floorTopY * 0.8);
+  // Draw overhead lights on the ceiling
+  const lightRadius = 8;
+  const numLights = 5;
+  ctx.fillStyle = "#ff0"; // yellow for a warm light effect
+  for (let i = 0; i < numLights; i++) {
+    const lightX = canvas.width * 0.15 + i * (canvas.width * 0.15);
+    const lightY = ceilingHeight * 0.5;
+    ctx.beginPath();
+    ctx.arc(lightX, lightY, lightRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
   
-  // Optionally, add perspective lines on the floor to enhance depth
+  // Add perspective lines on the floor to enhance depth
   const numLines = 10;
   ctx.strokeStyle = "#777";
   ctx.lineWidth = 1;
   for (let i = 1; i < numLines; i++) {
-    const y = floorTopY + ((canvas.height - floorTopY) / numLines) * i;
+    const y = floorY + ((canvas.height - floorY) / numLines) * i;
     ctx.beginPath();
     ctx.moveTo(canvas.width * 0.1, y);
     ctx.lineTo(canvas.width * 0.9, y);
