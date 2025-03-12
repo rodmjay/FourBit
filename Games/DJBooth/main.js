@@ -11,49 +11,107 @@ function resizeCanvas() {
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-// Game state variables
-var energyLevel = 0; // Energy level increases with music play
+// Global game state
+var energyLevel = 0; // Increases when music is played
 var maxEnergy = 100;
 var playing = false;
-// Function to draw the room from the DJ's perspective
+var startTime = Date.now();
+// Create an array of block people placed along the floor
+var numPeople = 8;
+var people = [];
+for (var i = 0; i < numPeople; i++) {
+    var person = {
+        x: canvas.width * (0.2 + 0.6 * (i / (numPeople - 1))), // evenly spaced horizontally
+        baseWidth: 20,
+        baseHeight: 40,
+        color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+    };
+    people.push(person);
+}
+// Function to draw the room with perspective
 function drawRoom() {
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw a gradient background simulating room depth
-    var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#444");
-    gradient.addColorStop(1, "#222");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Draw perspective lines to simulate depth (e.g., floor tiles)
+    // Define the floor as a trapezoid
+    var floorTopY = canvas.height * 0.5;
+    ctx.fillStyle = "#444";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width * 0.1, floorTopY);
+    ctx.lineTo(canvas.width * 0.9, floorTopY);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    // Draw left wall as a trapezoid
+    ctx.fillStyle = "#555";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(canvas.width * 0.1, floorTopY);
+    ctx.lineTo(canvas.width * 0.1, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    // Draw right wall as a trapezoid
+    ctx.fillStyle = "#555";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width, 0);
+    ctx.lineTo(canvas.width * 0.9, floorTopY);
+    ctx.lineTo(canvas.width * 0.9, canvas.height);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    // Draw the ceiling as a light rectangle on the top portion
+    ctx.fillStyle = "#666";
+    ctx.fillRect(0, 0, canvas.width, floorTopY * 0.8);
+    // Optionally, add perspective lines on the floor to enhance depth
     var numLines = 10;
-    ctx.strokeStyle = "#555";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#777";
+    ctx.lineWidth = 1;
     for (var i = 1; i < numLines; i++) {
-        var y = (canvas.height / numLines) * i;
+        var y = floorTopY + ((canvas.height - floorTopY) / numLines) * i;
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+        ctx.moveTo(canvas.width * 0.1, y);
+        ctx.lineTo(canvas.width * 0.9, y);
         ctx.stroke();
     }
-    // Draw the crowd as a row of circles reacting to energyLevel
-    var numPeople = 10;
-    var spacing = canvas.width / (numPeople + 1);
-    for (var i = 1; i <= numPeople; i++) {
-        var baseRadius = 15;
-        var radius = baseRadius + (energyLevel / maxEnergy) * 10;
-        // Adjust color based on energy level
-        var colorIntensity = Math.min(255, Math.floor((energyLevel / maxEnergy) * 255));
-        ctx.fillStyle = "rgb(".concat(colorIntensity, ", ").concat(255 - colorIntensity, ", 0)");
-        // Position the crowd toward the top (simulate a room view)
-        var x = i * spacing;
-        var y = canvas.height * 0.3; // 30% from the top
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
+}
+// Function to draw dancing block people on the floor
+function drawDancingPeople(time) {
+    for (var _i = 0, people_1 = people; _i < people_1.length; _i++) {
+        var person = people_1[_i];
+        // Use a sine wave to simulate dancing (jumping up and down)
+        var danceFactor = Math.abs(Math.sin((time + person.x) * 0.005));
+        var height = person.baseHeight + danceFactor * 20 * (energyLevel / maxEnergy);
+        var width = person.baseWidth;
+        // Position the person on the floor (just above the floor top)
+        var y = canvas.height * 0.5 - height;
+        ctx.fillStyle = person.color;
+        ctx.fillRect(person.x - width / 2, y, width, height);
     }
 }
-// Update game state (e.g., decay energy level when not playing)
+// Function to draw the DJ booth with perspective
+function drawDJBooth() {
+    // The DJ booth is drawn as a trapezoid in the bottom center
+    var boothHeight = 80;
+    var boothWidthTop = 200;
+    var boothWidthBottom = 300;
+    var centerX = canvas.width / 2;
+    var bottomY = canvas.height;
+    var topY = bottomY - boothHeight;
+    ctx.fillStyle = "#222";
+    ctx.beginPath();
+    ctx.moveTo(centerX - boothWidthTop / 2, topY);
+    ctx.lineTo(centerX + boothWidthTop / 2, topY);
+    ctx.lineTo(centerX + boothWidthBottom / 2, bottomY);
+    ctx.lineTo(centerX - boothWidthBottom / 2, bottomY);
+    ctx.closePath();
+    ctx.fill();
+    // Draw an outline to emphasize the booth's perspective
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+// Update game state (e.g., energy level decay)
 function updateGameState() {
     if (!playing && energyLevel > 0) {
         energyLevel = Math.max(0, energyLevel - 0.1);
@@ -61,16 +119,18 @@ function updateGameState() {
 }
 // Main game loop
 function gameLoop() {
+    var currentTime = Date.now() - startTime;
     updateGameState();
     drawRoom();
+    drawDancingPeople(currentTime);
+    drawDJBooth();
     requestAnimationFrame(gameLoop);
 }
 gameLoop();
-// Event listeners for DJ controls
+// DJ control event listeners
 playButton.addEventListener("click", function () {
     playing = true;
     energyLevel = Math.min(maxEnergy, energyLevel + 15);
-    // (Optionally, integrate real audio playback here.)
 });
 stopButton.addEventListener("click", function () {
     playing = false;
